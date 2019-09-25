@@ -166,12 +166,15 @@ class Play {
 
     public static boolean dealerPlay() {
         String card = "";
-        String message = "";
         System.out.println("Jean Claude a retourné sa deuxième carte, " + completeCard(maskedCard) + ", son score est de " + score[1] + " points");
         while(score[1]<17)
         {
-            System.out.println("Jean-Claude réfléchit...  Dites-lui se bouger !");
-            message = entree.next();
+            System.out.println("Jean-Claude réfléchit...");
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             card = cardsDealing(1);
             System.out.println("Jean Claude a tiré une autre carte, " + completeCard(card) + ", son nouveau score est de " + score[1] + " points");
         }
