@@ -16,6 +16,7 @@ import java.text.DecimalFormat;
 public class PlayFx extends Application {
 
     static String[] pickedCards = new String[52];
+    static int nbCards = 0;
     static String[] cards = {"1H", "2H", "3H", "4H", "5H", "6H", "7H", "8H", "9H", "DH", "JH", "QH", "KH", "1S", "2S", "3S", "4S", "5S", "6S", "7S", "8S", "9S", "DS", "JS", "QS", "KS", "1C", "2C", "3C", "4C", "5C", "6C", "7C", "8C", "9C", "DC", "JC", "QC", "KC", "1D", "2D", "3D", "4D", "5D", "6D", "7D", "8D", "9D", "DD", "JD", "QD", "KD"};
     static int[] score = new int[2];
     static Scanner entree = new Scanner(System.in);
@@ -23,13 +24,26 @@ public class PlayFx extends Application {
     static boolean keepGoing = false;
     static String card;
 
+    static TextArea mainField = new TextArea();
+    static Label playerHand = new Label();
+    static TextArea playerField = new TextArea();
+    static Label dealerHand = new Label();
+    static TextArea dealerField = new TextArea();
+    static TextArea message = new TextArea();
+    static Button oui = new Button();
+    static Button non = new Button();
+    static Button one = new Button();
+    static Button eleven = new Button();
+    static Button restart = new Button();
+    static Button exit = new Button();
+
     public static void main(String[] args) {
 
         launch(args);
     }
 
 
-    public static String cardsDealing(int player, TextArea field) {
+    public static String cardsDealing(int player) {
         
         
         Random random = new Random();
@@ -43,7 +57,7 @@ public class PlayFx extends Application {
             check = cardCheck(selectedCard, randomIndex);
         }
         
-        score(selectedCard, player, field);
+        score(selectedCard, player);
         return selectedCard;
     }
 
@@ -51,20 +65,29 @@ public class PlayFx extends Application {
     public static boolean cardCheck(String card, int randomIndex) {
         
         
-        if (card.equals(pickedCards[randomIndex])) {
+        if (nbCards >= 52) {
+            
+            mainField.appendText("\nIl n'y a plus de cartes ! Le jeu a été remélangé.");
+            Arrays.fill(pickedCards, null);
+            nbCards = 0;
+            return true;
+        }
+        else if (card.equals(pickedCards[randomIndex])) {
             return false;
         }
         else {
             pickedCards[randomIndex] = card;
+            nbCards ++;
             return true;
+            
         }
 
     }
 
-    public static void score(String card, int player, TextArea field) {
+    public static void score(String card, int player) {
         switch(card.charAt(0)){
             case '1':
-                ace(player, field);
+                ace(player);
                 break;
             case '2':
                 score[player] += 2;
@@ -105,7 +128,7 @@ public class PlayFx extends Application {
         }
     }
 
-    public static void ace(int player, TextArea field) {
+    public static void ace(int player) {
 
         if (player == 1) {
             if (score[1] <= 10) {
@@ -116,28 +139,49 @@ public class PlayFx extends Application {
             }
         }
         else {
-            field.appendText("Vous avez tiré un as, souhaitez-vous compter 1 ou 11 points ?");
-            // String choix = entree.next();
-            String choix = "11";
-            while(!choix.equals("1") && !choix.equals("11")) {
-                field.appendText("N'essayez pas de tricher !");
-                choix = entree.next();
-            }
-            score[0] += Integer.valueOf(choix);
+            message.setText("Vous avez tiré un as, souhaitez-vous compter 1 ou 11 points ?");
+            oui.setVisible(false);
+            non.setVisible(false);
+            one.setVisible(true);
+            eleven.setVisible(true);
         }
     }
 
-    public static void keepGoing(TextArea mainField, TextArea playerField, TextArea dealerField, boolean answer, Button oui, Button non, Button restart, TextArea message) {
+    public static void oneEleven(int oneEleven) {
 
-        if (answer) {
-            String card = cardsDealing(0, playerField);
-            playerField.appendText("\nVous avez tiré " + completeCard(card) + ".");
+        score[0] += oneEleven;
+
+        if (score[0] == 21) {
+            oui.setVisible(false);
+            non.setVisible(false);
+            keepGoing = dealerPlay();
+        }
+        else {
             playerField.appendText("\nVotre score est de " + score[0] + " points !");
-            
+            message.setText("\nVoulez-vous tirer une autre carte ?");
+            one.setVisible(false);
+            eleven.setVisible(false);
+            oui.setVisible(true);
+            non.setVisible(true);
+        }
+    }
+
+    public static void keepGoing(boolean answer) {
+
+        String completeCard;
+        if (answer) {
+            String card = cardsDealing(0);
+            completeCard = completeCard(card);
+            playerField.appendText("\nVous avez tiré " + completeCard + ".");
+                if (completeCard.equals("l'As de carreau") || completeCard.equals("l'As de coeur") || completeCard.equals("l'As de trèfle") || completeCard.equals("l'As de pique")) {
+                }
+                else {
+                    playerField.appendText("\nVotre score est de " + score[0] + " points !");
+                }
             if(score[0]==21) {
                 oui.setVisible(false);
                 non.setVisible(false);
-                keepGoing = dealerPlay(dealerField, restart, message);
+                keepGoing = dealerPlay();
             }
             else if(score[0]>21) {
                 message.setText("\nVous avez perdu !");
@@ -147,26 +191,30 @@ public class PlayFx extends Application {
                 restart.setVisible(true);
             }
             else {
-                message.setText("\nVoulez vous tirer une autre carte ? (O/N)");
+                if (completeCard.equals("l'As de carreau") || completeCard.equals("l'As de coeur") || completeCard.equals("l'As de trèfle") || completeCard.equals("l'As de pique")) {
+                    message.setText("\nSouhaitez-vous compter 1 ou 11 points ?");
+                }
+                else message.setText("\nVoulez-vous tirer une autre carte ?");
             }
         }
         else {
             oui.setVisible(false);
             non.setVisible(false);
-            keepGoing = dealerPlay(dealerField, restart, message);
+            keepGoing = dealerPlay();
         }
     }
 
-    public static boolean dealerPlay(TextArea field, Button restart, TextArea message) {
+    public static boolean dealerPlay() {
         String card = "";
-        field.appendText("\nJean Claude a retourné sa deuxième carte, " + completeCard(maskedCard) + ", son score est de " + score[1] + " points");
+        dealerField.appendText("\nJean Claude a retourné sa deuxième carte, " + completeCard(maskedCard) + ", son score est de " + score[1] + " points");
         while(score[1]<17)
         {
-            card = cardsDealing(1, field);
-            field.appendText("\nJean Claude a tiré une autre carte, " + completeCard(card) + ", son nouveau score est de " + score[1] + " points");
+            dealerField.appendText("\nJean-Claude réfléchit...");
+            card = cardsDealing(1);
+            dealerField.appendText("\nJean Claude a tiré une autre carte, " + completeCard(card) + ", son nouveau score est de " + score[1] + " points");
         }
         if(score[1]>21) {
-            message.setText("\nJean Claude a perdu, donc vous avez gagné, petit veinard !!!");
+            message.setText("\nJean Claude a perdu, donc vous avez gagné !");
             restart.setVisible(true);
             return true;
         }
@@ -235,119 +283,125 @@ public class PlayFx extends Application {
         return completeCard;
     }
 
-    public static void restart(TextArea field1, TextArea field2, TextArea field3, Button restart, Button oui, Button non, TextArea message) {
-        field1.clear();
-        field2.clear();
-        field3.clear();
+    public static void restart() {
+
+        mainField.clear();
+        playerField.clear();
+        dealerField.clear();
         score[0] = 0;
         score[1] = 0;
-        gameStart(field1, field2, field3, restart, oui, non, message);
+        gameStart();
     }
 
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+
         GridPane root = new GridPane();
-        root.setPadding(new Insets(30));
+        root.setPadding(new Insets(40));
         root.setHgap(15);
         root.setVgap(15);
-
-        TextArea field1 = new TextArea();
-        field1.setEditable(false);
-        field1.setPrefWidth(1000);
-        field1.setPrefRowCount(3);
-        root.add(field1, 1, 0, 3, 1);
-
-        Label playerHand = new Label();
-        playerHand.setText("  Votre main :");
-        root.add(playerHand, 1, 1, 3, 1);
-        playerHand.setStyle("-fx-font-weight: bold;");
-
-        TextArea field2 = new TextArea();
-        field2.setEditable(false);
-        field2.setPrefWidth(1000);
-        field2.setPrefRowCount(8);
-        root.add(field2, 1, 2, 3, 1);
-
-        Label dealerHand = new Label();
-        dealerHand.setText("  La main de Jean-Claude :");
-        root.add(dealerHand, 1, 3, 3, 1);
-        dealerHand.setStyle("-fx-font-weight: bold;");
-
-        TextArea field3 = new TextArea();
-        field3.setEditable(false);
-        field3.setPrefWidth(1000);
-        field3.setPrefRowCount(8);
-        root.add(field3, 1, 4, 3, 1);
-
-        TextArea message = new TextArea();
-        message.setEditable(false);
-        message.setPrefWidth(1000);
-        message.setPrefRowCount(1);
-        root.add(message, 1, 5, 3, 1);
-        message.setStyle("-fx-font-weight: bold;");
-
-        Button oui = new Button();
-        oui.setText("Oui");
-        root.add(oui, 1, 6);
-        oui.setStyle("-fx-font-weight: bold;");
         
-        Button non = new Button();
-        non.setText("Non");
-        root.add(non, 2, 6);
-        non.setStyle("-fx-font-weight: bold;");
-
-        Button restart = new Button();
-        restart.setText("Recommencer");
-        root.add(restart, 1, 6);
-        restart.setStyle("-fx-font-weight: bold;");
-        restart.setVisible(false);
-        restart.setOnAction(event -> restart(field1, field2, field3, restart, oui, non, message));
-
-        Button exit = new Button();
-        exit.setText("Quitter");
-        root.add(exit, 1, 7);
-        exit.setStyle("-fx-font-weight: bold;");
-        exit.setOnAction(event -> exit());
-
-        oui.setOnAction(event -> keepGoing(field1, field2, field3, true, oui, non, restart, message));
-        non.setOnAction(event -> keepGoing(field1, field2, field3, false, oui, non, restart, message));
-
         Scene scene = new Scene(root, 1100, 650);
         primaryStage.setTitle("Vegas Always Wins");
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        gameStart(field1, field2, field3, restart, oui, non, message);
+        mainField.setEditable(false);
+        mainField.setPrefWidth(1000);
+        root.add(mainField, 1, 0, 8, 1);
+
+        playerHand.setText("  Votre main :");
+        root.add(playerHand, 1, 1, 4, 1);
+        playerHand.setStyle("-fx-font-weight: bold;");
+        
+        playerField.setEditable(false);
+        playerField.setPrefWidth(1000);
+        root.add(playerField, 1, 2, 8, 1);
+        
+        dealerHand.setText("  La main de Jean-Claude :");
+        root.add(dealerHand, 1, 3, 4, 1);
+        dealerHand.setStyle("-fx-font-weight: bold;");
+        
+        dealerField.setEditable(false);
+        dealerField.setPrefWidth(1000);
+        root.add(dealerField, 1, 4, 8, 1);
+        
+        message.setEditable(false);
+        message.setPrefWidth(1000);
+        message.setPrefRowCount(1);
+        root.add(message, 1, 5, 4, 1);
+        message.setStyle("-fx-font-weight: bold;");
+        
+        oui.setText("Oui");
+        root.add(oui, 5, 5);
+        oui.setStyle("-fx-font-weight: bold;");
+        
+        non.setText("Non");
+        root.add(non, 6, 5);
+        non.setStyle("-fx-font-weight: bold;");
+
+        one.setText("1 point");
+        root.add(one, 7, 5);
+        one.setStyle("-fx-font-weight: bold;");
+        one.setVisible(false);
+
+        eleven.setText("11 points");
+        root.add(eleven, 8, 5);
+        eleven.setStyle("-fx-font-weight: bold;");
+        eleven.setVisible(false);
+        
+        restart.setText("Recommencer");
+        root.add(restart, 1, 6);
+        restart.setStyle("-fx-font-weight: bold;");
+        restart.setVisible(false);
+        restart.setOnAction(event -> restart());
+        
+        exit.setText("Quitter");
+        root.add(exit, 1, 7);
+        exit.setStyle("-fx-font-weight: bold;");
+        exit.setOnAction(event -> exit());
+
+        oui.setOnAction(event -> keepGoing(true));
+        non.setOnAction(event -> keepGoing(false));
+
+        one.setOnAction(even -> oneEleven(1));
+        eleven.setOnAction(even -> oneEleven(11));
+
+
+
+        gameStart();
 
 
     }
 
-    public static void gameStart(TextArea field1, TextArea field2, TextArea field3, Button restart, Button oui, Button non, TextArea message) {
+    public static void gameStart() {
 
-        field1.setText("Bonjour, bienvenue au VAW (Vegas Always Wins).");
-        field1.appendText("\nVous prenez place à la table de Black Jack. Des joueurs vous lancent des regards menaçants.");
-        field1.appendText("\nLe jeu commence. Jean-Claude, votre dealer, distribue les cartes.");
+        mainField.setText("Bonjour, bienvenue au VAW (Vegas Always Wins).");
+        mainField.appendText("\nVous prenez place à la table de Black Jack. Des joueurs vous lancent des regards menaçants.");
+        mainField.appendText("\nLe jeu commence. Jean-Claude, votre dealer, distribue les cartes.");
 
-        String card = cardsDealing(0, field2);
-        field2.setText("Vous avez tiré " + completeCard(card) + ".");
-        card = cardsDealing(0, field2);
-        field2.appendText("\nVous avez tiré " + completeCard(card) + ".");
-        field2.appendText("\nVotre score est de " + score[0] + " points !");
+        String card = cardsDealing(0);
+        playerField.setText("Vous avez tiré " + completeCard(card) + ".");
+        card = cardsDealing(0);
+        playerField.appendText("\nVous avez tiré " + completeCard(card) + ".");
+        playerField.appendText("\nVotre score est de " + score[0] + " points !");
 
-        card = cardsDealing(1, field3);
-        field3.setText("Jean-Claude a tiré " + completeCard(card) + ".");
-        field3.appendText("\nSon score est de " + score[1] + " points !");
-        maskedCard = cardsDealing(1, field3);
-        field3.appendText("\nJean-Claude a tiré une carte qui restera face cachée.");
+        card = cardsDealing(1);
+        dealerField.setText("Jean-Claude a tiré " + completeCard(card) + ".");
+        dealerField.appendText("\nSon score est de " + score[1] + " points !");
+        maskedCard = cardsDealing(1);
+        dealerField.appendText("\nJean-Claude a tiré une carte qui restera face cachée.");
 
         if (score[0] == 21) {
-            keepGoing = dealerPlay(field3, restart, message);
+            keepGoing = dealerPlay();
         }
 
-        message.setText("\nVoulez vous tirer une autre carte ? (O/N)");
+        message.setText("\nVoulez vous tirer une autre carte ?");
         oui.setVisible(true);
         non.setVisible(true);
+        one.setVisible(false);
+        eleven.setVisible(false);
         restart.setVisible(false);
     }
 
