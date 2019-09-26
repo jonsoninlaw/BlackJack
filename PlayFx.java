@@ -10,7 +10,6 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
-
 import java.text.DecimalFormat;
 
 public class PlayFx extends Application {
@@ -45,7 +44,6 @@ public class PlayFx extends Application {
 
     public static String cardsDealing(int player) {
         
-        
         Random random = new Random();
         int randomIndex;
         boolean check = false;
@@ -56,7 +54,6 @@ public class PlayFx extends Application {
             selectedCard = cards[randomIndex];
             check = cardCheck(selectedCard, randomIndex);
         }
-        
         score(selectedCard, player);
         return selectedCard;
     }
@@ -66,7 +63,6 @@ public class PlayFx extends Application {
         
         
         if (nbCards >= 52) {
-            
             mainField.appendText("\nIl n'y a plus de cartes ! Le jeu a été remélangé.");
             Arrays.fill(pickedCards, null);
             nbCards = 0;
@@ -75,16 +71,19 @@ public class PlayFx extends Application {
         else if (card.equals(pickedCards[randomIndex])) {
             return false;
         }
+        else if (((card.equals("1C")) || card.equals("1H") || card.equals("1S") || card.equals("1D")) && nbCards <= 3) {
+            return false;
+        }
         else {
             pickedCards[randomIndex] = card;
             nbCards ++;
             return true;
-            
         }
-
     }
 
+
     public static void score(String card, int player) {
+
         switch(card.charAt(0)){
             case '1':
                 ace(player);
@@ -147,6 +146,7 @@ public class PlayFx extends Application {
         }
     }
 
+
     public static void oneEleven(int oneEleven) {
 
         score[0] += oneEleven;
@@ -165,6 +165,7 @@ public class PlayFx extends Application {
             non.setVisible(true);
         }
     }
+
 
     public static void keepGoing(boolean answer) {
 
@@ -204,6 +205,7 @@ public class PlayFx extends Application {
         }
     }
 
+
     public static boolean dealerPlay() {
         String card = "";
         dealerField.appendText("\nJean Claude a retourné sa deuxième carte, " + completeCard(maskedCard) + ", son score est de " + score[1] + " points");
@@ -234,9 +236,9 @@ public class PlayFx extends Application {
                 restart.setVisible(true);
                 return true;
             }
-
         }
     }
+
 
     public static String completeCard(String card) {
 
@@ -279,9 +281,9 @@ public class PlayFx extends Application {
         }
 
         String completeCard = cardNumber + cardColor;
-
         return completeCard;
     }
+
 
     public static void restart() {
 
@@ -298,7 +300,7 @@ public class PlayFx extends Application {
     public void start(Stage primaryStage) throws Exception {
 
         GridPane root = new GridPane();
-        root.setPadding(new Insets(40));
+        root.setPadding(new Insets(72));
         root.setHgap(15);
         root.setVgap(15);
         
@@ -368,12 +370,9 @@ public class PlayFx extends Application {
         one.setOnAction(even -> oneEleven(1));
         eleven.setOnAction(even -> oneEleven(11));
 
-
-
         gameStart();
-
-
     }
+
 
     public static void gameStart() {
 
@@ -405,8 +404,8 @@ public class PlayFx extends Application {
         restart.setVisible(false);
     }
 
+    
     public static void exit() {
         System.exit(0);
     }
-
 }

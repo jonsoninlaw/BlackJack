@@ -169,7 +169,7 @@ class Play {
         System.out.println("Jean Claude a retourné sa deuxième carte, " + completeCard(maskedCard) + ", son score est de " + score[1] + " points");
         while(score[1]<17)
         {
-            System.out.println("Jean-Claude réfléchit...");
+            System.out.println("\nJean-Claude réfléchit...");
             try {
                 Thread.sleep(3000);
             } catch (InterruptedException e) {
