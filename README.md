@@ -1,3 +1,6 @@
-Jeu de Black Jack dans le terminal.
+## Black Jack
 
-Créé par Lolo et Jojo le 25 septembre 2019 à la Wild Code School de Toulouse.
+### Jeu de Black Jack dans le terminal.
+
+
+Premier projet Java en Peer Programming à la Wild Code School de Toulouse. En collaboration avec Laurent.
